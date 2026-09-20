@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Secrets — never commit an HF token or any credential
+.env
+*.token
+hf_token*
+huggingface_token*
+
+# Local run outputs (raw per-run reports; the curated FINDINGS.md IS committed)
+out.md
+*.out.md
+findings_*.md
+reports/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
