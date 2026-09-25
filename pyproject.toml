@@ -31,6 +31,7 @@ dependencies = []  # core is zero-dependency: stdlib only, talks to Ollama over 
 [project.optional-dependencies]
 hf = ["transformers>=4.40", "torch>=2.0"]  # only needed for the Prompt Guard target
 dev = ["pytest>=7", "ruff>=0.5"]
+docs = ["matplotlib>=3.5"]  # only needed to regenerate docs/bypass_gap.png
 
 [project.urls]
 Homepage = "https://github.com/jafeeri/wardbreaker"

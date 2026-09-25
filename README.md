@@ -1,10 +1,8 @@
 <h1 align="center">WARDBREAKER</h1>
 
 <p align="center">
-  <strong>A local fuzzer for open-weight LLM guardrails.</strong><br>
-  It mutates prompts through a taxonomy of attack families against a guardrail
-  classifier, and reports — per family — what slips past, what over-blocks, and
-  which bypasses <em>actually work on the model behind the guard</em>.
+  <strong>77% of the prompt mutations that fool an LLM guardrail don't actually work on the model behind it.</strong><br>
+  WARDBREAKER is a local fuzzer that measures the difference — per attack family, against open-weight guards you run yourself.
 </p>
 
 <p align="center">
@@ -14,6 +12,17 @@
   <img src="https://img.shields.io/badge/core-zero--dependency-green" alt="Zero dependency core">
   <img src="https://img.shields.io/badge/targets-local%20only-orange" alt="Local targets only">
 </p>
+
+<p align="center">
+  <img src="docs/bypass_gap.png" alt="Per guard: mutations that flipped the guard vs real bypasses that still work on the model" width="720">
+</p>
+
+> **The finding.** 77% of mutations that fool a guardrail don't work on the model
+> behind it — so counting guard flips alone overstates real bypass risk by about
+> **4×**. **Llama Guard 3 8B held**: 5 real bypasses in 110 attempts, 0%
+> false-positive rate. **Prompt Guard 2 86M didn't**: 19% got through, and it blocked
+> 30% of *benign* prompts. Full method, per-family tables, and caveats in
+> **[FINDINGS.md](FINDINGS.md)**.
 
 ---
 
@@ -29,6 +38,7 @@
 - [Why this exists](#why-this-exists)
 - [The killer feature: a bypass has to actually work](#the-killer-feature-a-bypass-has-to-actually-work)
 - [Results](#results)
+- [What this means if you deploy a guardrail](#what-this-means-if-you-deploy-a-guardrail)
 - [Attack families](#attack-families)
 - [Targets](#targets)
 - [Quickstart](#quickstart)
@@ -39,6 +49,7 @@
 - [Limitations](#limitations)
 - [Development](#development)
 - [Citation](#citation)
+- [Contact](#contact)
 - [License](#license)
 
 ## Why this exists
@@ -89,6 +100,24 @@ Measured 2026-09-20, downstream oracle `llama3.2:latest`, 10 seeds per category
 
 Numbers are a **measurement**, not a leaderboard — they depend on the model tags, the
 seeds, the downstream model, and the date. Re-run to reproduce.
+
+## What this means if you deploy a guardrail
+
+- **Measure end-to-end, not the guard in isolation.** A guard-flip is not a breach.
+  77% of the flips here died on the model. If you harden a guard against mutation
+  attacks without checking what still works on your *actual* model, you'll chase
+  phantoms and miss the real ones.
+- **Normalise before you classify.** Every real bypass here was invisible-character
+  injection — zero-width spaces, variation selectors, homoglyphs, combining marks.
+  Fold input to a canonical form *before* the guard sees it and most of them vanish.
+  It's the cheapest fix on this page.
+- **An injection classifier is not a content-policy guard.** Prompt Guard rates
+  "how do I pick a lock" as benign — it only flags injection patterns. Layer it with a
+  content guard rather than relying on it, and watch its over-blocking (30% FPR here,
+  from benign "ignore / disregard / forget" phrasing).
+- **A guardrail is one layer of defence in depth, never the wall.** Bound what a
+  compromised model can actually do; the guard reduces incidence, it is not the
+  guarantee.
 
 ## Attack families
 
@@ -239,6 +268,13 @@ self-check on every push across Python 3.9–3.12.
   license = {MIT}
 }
 ```
+
+## Contact
+
+Questions, a bug, or a coordinated-disclosure heads-up? Open a
+[GitHub issue](https://github.com/jafeeri/wardbreaker/issues), or reach the maintainer
+through the GitHub profile linked at the top. The disclosure policy is in
+[SECURITY.md](SECURITY.md).
 
 ## License
 
